@@ -1,7 +1,9 @@
 import { createApp, h, watchEffect } from 'vue'
 import { Repl, ReplStore } from '../src'
+import DemoDocPage from '../src/DemoDocPage.vue'
 ;(window as any).process = { env: {} }
-
+import ViewUIPlus from 'view-ui-plus'
+import 'view-ui-plus/dist/styles/viewuiplus.css'
 const App = {
   setup() {
     const query = new URLSearchParams(location.search)
@@ -35,10 +37,10 @@ const App = {
     // store.setVueVersion('3.2.8')
 
     return () =>
-      h(Repl, {
+      h(DemoDocPage, {
         store,
         // layout: 'vertical',
-        ssr: true,
+        ssr: false,
         sfcOptions: {
           script: {
             // inlineTemplate: false

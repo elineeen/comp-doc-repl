@@ -15,8 +15,10 @@ import { PreviewProxy } from './PreviewProxy'
 import { compileModulesForPreview } from './moduleCompiler'
 import { Store } from '../store'
 
+const publicPath = './'
+const iviewCss = `${publicPath}viewuiplus.css`
 const props = defineProps<{ show: boolean; ssr: boolean }>()
-
+const instanceKey= inject('instanceKey') as string
 const store = inject('store') as Store
 const clearConsole = inject('clear-console') as Ref<boolean>
 const container = ref()
@@ -175,8 +177,8 @@ async function updatePreview() {
   }
 
   try {
-    const mainFile = store.state.mainFile
 
+    const mainFile = instanceKey
     // if SSR, generate the SSR bundle and eval it to render the HTML
     if (isSSR && mainFile.endsWith('.vue')) {
       const ssrModules = compileModulesForPreview(store, true)
@@ -205,7 +207,8 @@ async function updatePreview() {
     }
 
     // compile code to simulated module system
-    const modules = compileModulesForPreview(store)
+    const modules = compileModulesForPreview(mainFile,store)
+
     console.log(
       `[@vue/repl] successfully compiled ${modules.length} module${
         modules.length > 1 ? `s` : ``
@@ -215,17 +218,27 @@ async function updatePreview() {
     const codeToEval = [
       `window.__modules__ = {}\nwindow.__css__ = ''\n` +
         `if (window.__app__) window.__app__.unmount()\n` +
-        (isSSR ? `` : `document.body.innerHTML = '<div id="app"></div>'`),
+        (isSSR ? `` : `document.body.innerHTML = '<div id="app" style="color: red"></div>'`),
       ...modules,
       `document.getElementById('__sfc-styles').innerHTML = window.__css__`
     ]
-
     // if main file is a vue file, mount it.
     if (mainFile.endsWith('.vue')) {
       codeToEval.push(
         `import { ${
           isSSR ? `createSSRApp` : `createApp`
         } as _createApp } from "vue"
+        import ViewUIPlus from 'view-ui-plus'
+        const appendStyle=()=> {
+          return new Promise((resolve, reject) => {
+            const link = document.createElement('link')
+            link.rel = 'stylesheet'
+            link.href = '${iviewCss}'
+            link.onload = resolve
+            link.onerror = reject
+            document.body.appendChild(link)
+          })
+        }
         const _mount = () => {
           const AppComponent = __modules__["${mainFile}"].default
           AppComponent.name = 'Repl'
@@ -233,13 +246,15 @@ async function updatePreview() {
           if (!app.config.hasOwnProperty('unwrapInjectedRef')) {
             app.config.unwrapInjectedRef = true
           }
+          app.use(ViewUIPlus)
           app.config.errorHandler = e => console.error(e)
           app.mount('#app')
         }
         if (window.__ssr_promise__) {
           window.__ssr_promise__.then(_mount)
         } else {
-          _mount()
+          appendStyle().then(_mount)
+          //_mount()
         }`
       )
     }

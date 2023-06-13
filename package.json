@@ -51,5 +51,8 @@
   },
   "peerDependencies": {
     "vue": "^3.2.13"
+  },
+  "dependencies": {
+    "view-ui-plus": "^1.3.13"
   }
 }

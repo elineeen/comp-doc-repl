@@ -8,14 +8,28 @@ import {
   SFCTemplateCompileOptions
 } from 'vue/compiler-sfc'
 import { OutputModes } from './output/types'
-
+const publicPath = './'
+const iviewCss = `${publicPath}varlet.css`
 const defaultMainFile = 'App.vue'
-
+export function appendStyle() {
+  return new Promise((resolve, reject) => {
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = iviewCss
+    link.onload = resolve
+    link.onerror = reject
+    document.body.appendChild(link)
+  })
+}
 const welcomeCode = `
 <script setup>
-import { ref } from 'vue'
-
+import {getCurrentInstance, ref } from 'vue'
+// import 'view-ui-plus/dist/styles/viewuiplus.css'
+import ViewUIPlus from 'view-ui-plus'
+const instance = getCurrentInstance()
+instance.appContext.app.use(ViewUIPlus)
 const msg = ref('Hello World!')
+console.dir('app.vue loaded')
 </script>
 
 <template>
@@ -63,7 +77,7 @@ export interface Store {
   options?: SFCOptions
   compiler: typeof defaultCompiler
   vueVersion?: string
-  init: () => void
+  init: (docList:Array<File>) => void
   setActive: (filename: string) => void
   addFile: (filename: string | File) => void
   deleteFile: (filename: string) => void
@@ -131,17 +145,22 @@ export class ReplStore implements Store {
       vueServerRendererURL: this.defaultVueServerRendererURL,
       resetFlip: true
     })
-
     this.initImportMap()
   }
 
   // don't start compiling until the options are set
-  init() {
+  init(fileList:Array<File>) {
+    const files: Record<string, File> = {}
+    fileList.forEach((file:File,)=>{
+      files[file.filename]=file
+    })
+    files[defaultMainFile]= new File(defaultMainFile, welcomeCode,true)
+    debugger
     watchEffect(() => compileFile(this, this.state.activeFile))
+    this.state.files=files
+    this.initImportMap()
     for (const file in this.state.files) {
-      if (file !== defaultMainFile) {
-        compileFile(this, this.state.files[file])
-      }
+      compileFile(this, this.state.files[file])
     }
   }
 
@@ -226,7 +245,8 @@ export class ReplStore implements Store {
           {
             imports: {
               vue: this.defaultVueRuntimeURL,
-              'vue/server-renderer': this.defaultVueServerRendererURL
+              'vue/server-renderer': this.defaultVueServerRendererURL,
+              'view-ui-plus':'./viewuiplus.min.esm.js',
             }
           },
           null,

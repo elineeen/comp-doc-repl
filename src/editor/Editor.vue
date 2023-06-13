@@ -7,9 +7,10 @@ import { computed, inject } from 'vue'
 import { Store } from '../store'
 
 const store = inject('store') as Store
-
+const instanceKey= inject('instanceKey') as string
 const onChange = debounce((code: string) => {
-  store.state.activeFile.code = code
+  store.state.activeFile=store.state.files[instanceKey]
+  //store.state.activeFile.code = code
 }, 250)
 
 const activeMode = computed(() => {
@@ -27,7 +28,7 @@ const activeMode = computed(() => {
   <div class="editor-container">
     <CodeMirror
       @change="onChange"
-      :value="store.state.activeFile.code"
+      :value="store.state.files[instanceKey].code"
       :mode="activeMode"
     />
     <Message :err="store.state.errors[0]" />

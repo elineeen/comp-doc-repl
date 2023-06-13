@@ -10,12 +10,12 @@ import {
 } from 'vue/compiler-sfc'
 import { ExportSpecifier, Identifier, Node } from '@babel/types'
 
-export function compileModulesForPreview(store: Store, isSSR = false) {
+export function compileModulesForPreview(mainFile:string,store: Store, isSSR = false) {
   const seen = new Set<File>()
   const processed: string[] = []
   processFile(
     store,
-    store.state.files[store.state.mainFile],
+    store.state.files[mainFile],
     processed,
     seen,
     isSSR
@@ -65,6 +65,7 @@ function processFile(
     isSSR ? file.compiled.ssr : file.compiled.js,
     file.filename
   )
+  debugger
   // append css
   if (!isSSR && file.compiled.css) {
     js += `\nwindow.__css__ += ${JSON.stringify(file.compiled.css)}`
@@ -74,8 +75,13 @@ function processFile(
     for (const imported of importedFiles) {
       processFile(store, store.state.files[imported], processed, seen, isSSR)
     }
+    debugger
   }
   // push self
+  if(file.filename.endsWith('.vue')){
+    const headerReplacer=`const __module__ = __modules__["${file.filename}"] = { [Symbol.toStringTag]: "Module" }\\n\\n/* Analyzed bindings: {\\n  "getCurrentInstance": "setup-const",\\n  "ref": "setup-const",\\n  "ViewUIPlus": "setup-maybe-ref",\\n  "instance": "setup-maybe-ref"\\n} */\\nimport { createTextVNode as _createTextVNode, resolveComponent as _resolveComponent, withCtx as _withCtx, createVNode as _createVNode, openBlock as _openBlock, createBlock as _createBlock } from "vue"\\n\\nimport {getCurrentInstance, ref } from 'vue'\\nimport ViewUIPlus from 'view-ui-plus'\\n\\nconst __sfc__ = {\\n  __name: '0',\\n  setup(__props) {\\n\\nconst instance = getCurrentInstance()\\ninstance.appContext.app.use(ViewUIPlus)\\n`
+    js.replace()
+  }
   processed.push(js)
 }
 
@@ -88,7 +94,8 @@ function processModule(
 
   const ast = babelParse(src, {
     sourceFilename: filename,
-    sourceType: 'module'
+    sourceType: 'module',
+    plugins:[],
   }).program.body
 
   const idToImportMap = new Map<string, string>()

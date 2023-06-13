@@ -14,18 +14,20 @@ export interface Props {
   sfcOptions?: SFCOptions
   layout?: string
   ssr?: boolean
+  instanceKey?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   store: () => new ReplStore(),
   autoResize: true,
-  showCompileOutput: true,
+  showCompileOutput: false,
   showImportMap: true,
   clearConsole: true,
-  ssr: false
+  ssr: false,
+  instanceKey:'',
 })
 
-const { store } = props
+const { store,instanceKey } = props
 const sfcOptions = (store.options = props.sfcOptions || {})
 if (!sfcOptions.script) {
   sfcOptions.script = {}
@@ -42,8 +44,7 @@ sfcOptions.script.fs = {
   }
 }
 
-store.init()
-
+provide('instanceKey', instanceKey)
 provide('store', store)
 provide('autoresize', props.autoResize)
 provide('import-map', toRef(props, 'showImportMap'))
