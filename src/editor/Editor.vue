@@ -10,7 +10,7 @@ const store = inject('store') as Store
 const instanceKey= inject('instanceKey') as string
 const onChange = debounce((code: string) => {
   store.state.activeFile=store.state.files[instanceKey]
-  //store.state.activeFile.code = code
+  store.state.activeFile.code = code
 }, 250)
 
 const activeMode = computed(() => {
@@ -24,7 +24,6 @@ const activeMode = computed(() => {
 </script>
 
 <template>
-  <FileSelector />
   <div class="editor-container">
     <CodeMirror
       @change="onChange"

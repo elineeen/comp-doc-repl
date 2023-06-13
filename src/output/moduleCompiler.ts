@@ -65,7 +65,6 @@ function processFile(
     isSSR ? file.compiled.ssr : file.compiled.js,
     file.filename
   )
-  debugger
   // append css
   if (!isSSR && file.compiled.css) {
     js += `\nwindow.__css__ += ${JSON.stringify(file.compiled.css)}`
@@ -75,13 +74,8 @@ function processFile(
     for (const imported of importedFiles) {
       processFile(store, store.state.files[imported], processed, seen, isSSR)
     }
-    debugger
   }
   // push self
-  if(file.filename.endsWith('.vue')){
-    const headerReplacer=`const __module__ = __modules__["${file.filename}"] = { [Symbol.toStringTag]: "Module" }\\n\\n/* Analyzed bindings: {\\n  "getCurrentInstance": "setup-const",\\n  "ref": "setup-const",\\n  "ViewUIPlus": "setup-maybe-ref",\\n  "instance": "setup-maybe-ref"\\n} */\\nimport { createTextVNode as _createTextVNode, resolveComponent as _resolveComponent, withCtx as _withCtx, createVNode as _createVNode, openBlock as _openBlock, createBlock as _createBlock } from "vue"\\n\\nimport {getCurrentInstance, ref } from 'vue'\\nimport ViewUIPlus from 'view-ui-plus'\\n\\nconst __sfc__ = {\\n  __name: '0',\\n  setup(__props) {\\n\\nconst instance = getCurrentInstance()\\ninstance.appContext.app.use(ViewUIPlus)\\n`
-    js.replace()
-  }
   processed.push(js)
 }
 

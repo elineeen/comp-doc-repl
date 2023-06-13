@@ -9,7 +9,7 @@ export const gridDemoDocList = [
 </script>`
 	},
 	{
-		code:`<template>
+		code: `<template>
     <Grid center square>
         <GridItem>1</GridItem>
         <GridItem>2</GridItem>

@@ -14,7 +14,3 @@ const docFileList=gridDemoDocList.map((d,i)=>new File(i+'.vue',d.code))
 storeSingleton.init(docFileList)
 
 </script>
-
-<style scoped>
-
-</style>
