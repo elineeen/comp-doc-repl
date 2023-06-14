@@ -14,17 +14,19 @@ const genStub: Plugin = {
 }
 
 export default defineConfig({
-  plugins: [vue(), genStub],
-  build: {
-    target: 'esnext',
-    minify: false,
-    lib: {
-      entry: './src/index.ts',
-      formats: ['es'],
-      fileName: () => 'vue-repl.js'
-    },
-    rollupOptions: {
-      external: ['vue', 'vue/compiler-sfc']
-    }
-  }
+  plugins: [vue()],
+  base:'/comp-doc-repl/',
+  // plugins: [vue(), genStub],
+  // build: {
+  //   target: 'esnext',
+  //   minify: false,
+  //   lib: {
+  //     entry: './src/index.ts',
+  //     formats: ['es'],
+  //     fileName: () => 'vue-repl.js'
+  //   },
+  //   rollupOptions: {
+  //     external: ['vue', 'vue/compiler-sfc']
+  //   }
+  // }
 })
